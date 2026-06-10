@@ -11,7 +11,7 @@ class Movie(TypedDict):
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_PATH = PROJECT_ROOT / "data"
-
+CACHE_PATH = PROJECT_ROOT / "cache"
 
 def load_movies() -> list[Movie]:
     with open(DATA_PATH / "movies.json", "r") as f:
