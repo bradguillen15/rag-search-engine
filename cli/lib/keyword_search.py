@@ -4,6 +4,18 @@ from lib.search_utils import Movie
 from lib.inverted_index import InvertedIndex
 from lib.text_utils import tokenize_text
 
+def bm25_tf_command(doc_id: int, term: str, k1: float) -> None:
+    index = InvertedIndex()
+    index.load()
+    bm25_tf = index.get_bm25_tf(doc_id, term, k1)
+    print(f"BM25 TF score of '{term}' in document '{doc_id}': {bm25_tf:.2f}")
+
+def bm25_idf_command(term: str) -> None:
+    index = InvertedIndex()
+    index.load()
+    bm25idf = index.get_bm25_idf(term)
+    print(f"BM25 IDF score of '{term}': {bm25idf:.2f}")
+
 
 def tf_idf_command(doc_id: int, term: str) -> None:
     index = InvertedIndex()

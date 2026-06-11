@@ -3,7 +3,7 @@ import math
 import pickle
 from collections import defaultdict, Counter
 
-from lib.search_utils import load_movies, CACHE_PATH
+from lib.search_utils import load_movies, CACHE_PATH, BM25_K1
 from lib.text_utils import tokenize_text, tokenize_term
 
 
@@ -31,12 +31,22 @@ class InvertedIndex:
         token = tokenize_term(term)
         return self.term_frequencies[doc_id][token]
 
+    def get_bm25_tf(self, doc_id: int, term: str, k1: float = BM25_K1) -> float:
+        tf = self.get_tf(doc_id, term)
+        return (tf * (k1 + 1)) / (tf + k1)
+
     def get_idf(self, term: str) -> float:
         token = tokenize_term(term)
 
         doc_count = len(self.docmap)
         term_doc_count = len(self.get_documents(token))
         return math.log((doc_count + 1) / (term_doc_count + 1))
+
+    def get_bm25_idf(self, term: str) -> float:
+        token = tokenize_term(term)
+        doc_count = len(self.docmap)
+        term_doc_count = len(self.get_documents(token))
+        return math.log((doc_count - term_doc_count + 1) / (term_doc_count + 0.5) + 1)
 
     def get_tf_idf(self, doc_id: int, term: str) -> float:
         tf = self.get_tf(doc_id, term)
