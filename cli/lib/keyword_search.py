@@ -1,7 +1,8 @@
 import os
+import sys
+import math
 import pickle
 import string
-import sys
 from nltk.stem import PorterStemmer
 from collections import defaultdict, Counter
 from lib.search_utils import Movie, load_movies, load_stop_words, CACHE_PATH
@@ -33,7 +34,16 @@ class InvertedIndex:
         return self.term_frequencies[doc_id][token]
 
     def get_idf(self, term: str) -> float:
-        pass
+        token = tokenize_term(term)
+
+        doc_count = len(self.docmap)
+        term_doc_count = len(self.get_documents(token))
+        return math.log((doc_count + 1) / (term_doc_count + 1))
+
+    def get_tf_idf(self, doc_id: int, term: str) -> float:
+        tf = self.get_tf(doc_id, term)
+        idf = self.get_idf(term)
+        return tf * idf
 
     def build(self):
         movies = load_movies()
@@ -66,11 +76,23 @@ class InvertedIndex:
         with open(self.term_frequencies_path, "rb") as f:
             self.term_frequencies = pickle.load(f)
 
+def tf_idf_command(doc_id: int, term: str) -> None:
+    index = InvertedIndex()
+    index.load()
+    tf_idf = index.get_tf_idf(doc_id, term)
+    print(f"TF-IDF score of '{term}' in document '{doc_id}': {tf_idf:.2f}")
+
 def tf(doc_id: int, term: str) -> None:
     index = InvertedIndex()
     index.load()
     result = index.get_tf(doc_id, term)
     print(result)
+
+def idf_command(term: str) -> None:
+    index = InvertedIndex()
+    index.load()
+    idf = index.get_idf(term)
+    print(f"Inverse document frequency of '{term}': {idf:.2f}")
 
 def build_command():
     index = InvertedIndex()
