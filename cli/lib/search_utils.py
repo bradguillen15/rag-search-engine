@@ -8,11 +8,12 @@ class Movie(TypedDict):
     title: str
     description: str
 
+BM25_K1 = 1.5
+BM25_B = 0.75
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_PATH = PROJECT_ROOT / "data"
 CACHE_PATH = PROJECT_ROOT / "cache"
-BM25_K1 = 1.5
 
 def load_movies() -> list[Movie]:
     with open(DATA_PATH / "movies.json", "r") as f:

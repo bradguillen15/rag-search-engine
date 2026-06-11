@@ -1,13 +1,21 @@
 import sys
 
-from lib.search_utils import Movie
+from lib.search_utils import Movie, BM25_K1, BM25_B
 from lib.inverted_index import InvertedIndex
 from lib.text_utils import tokenize_text
 
-def bm25_tf_command(doc_id: int, term: str, k1: float) -> None:
+
+def bm25_search_command(query: str, limit: int = 5) -> None:
     index = InvertedIndex()
     index.load()
-    bm25_tf = index.get_bm25_tf(doc_id, term, k1)
+    results = index.bm25_search(query, limit)
+    for i, result in enumerate(results):
+        print(f"{i + 1}. ({result['doc_id']}) {result['title']} - Score: {result['score']:.2f}")
+
+def bm25_tf_command(doc_id: int, term: str, k1: float = BM25_K1, b: float = BM25_B) -> None:
+    index = InvertedIndex()
+    index.load()
+    bm25_tf = index.get_bm25_tf(doc_id, term, k1, b)
     print(f"BM25 TF score of '{term}' in document '{doc_id}': {bm25_tf:.2f}")
 
 def bm25_idf_command(term: str) -> None:
