@@ -4,6 +4,7 @@ from lib.semantic_search import (
     embed_text,
     verify_embeddings,
     embed_query_text,
+    search_command,
 )
 
 def main() -> None:
@@ -20,9 +21,15 @@ def main() -> None:
     embed_query_parser = subparsers.add_parser("embed_query", help="Embed a query text")
     embed_query_parser.add_argument("query", type=str, help="Query text to be encoded")
 
+    search_parser = subparsers.add_parser("search", help="Search for movies using semantic search")
+    search_parser.add_argument("query", type=str, help="Search query")
+    search_parser.add_argument("--limit", type=int, nargs='?', default=5, help="Number of results to return")
+
     args = parser.parse_args()
 
     match args.command:
+        case "search":
+            search_command(args.query, args.limit)
         case "embed_query":
             embed_query_text(args.query)
         case "verify_embeddings":
