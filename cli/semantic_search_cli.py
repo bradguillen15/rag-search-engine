@@ -5,6 +5,7 @@ from lib.semantic_search import (
     verify_embeddings,
     embed_query_text,
     search_command,
+    chunk_text,
 )
 
 def main() -> None:
@@ -25,9 +26,16 @@ def main() -> None:
     search_parser.add_argument("query", type=str, help="Search query")
     search_parser.add_argument("--limit", type=int, nargs='?', default=5, help="Number of results to return")
 
+    chunk_parser = subparsers.add_parser("chunk", help="Chunk text into fixed-size chunks")
+    chunk_parser.add_argument("text", type=str, help="Text to be chunked")
+    chunk_parser.add_argument("--chunk-size", type=int, nargs='?', default=200, help="Size of each chunk")
+    chunk_parser.add_argument("--overlap", type=int, nargs='?', default=0, help="Overlap between chunks")
+
     args = parser.parse_args()
 
     match args.command:
+        case "chunk":
+            chunk_text(args.text, args.overlap, args.chunk_size)
         case "search":
             search_command(args.query, args.limit)
         case "embed_query":

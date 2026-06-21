@@ -59,6 +59,23 @@ class SemanticSearch:
             })
         return results
 
+def  fixed_sized_chunking(text: str, overlap, chunk_size: int = 200) -> list[str]:
+    words = text.split()
+    chunks = []
+    step_size = chunk_size - overlap
+    for i in range(0, len(words), step_size):
+        chunk_words = words[i:i+chunk_size]
+        if len(chunk_words) <= overlap:
+            break
+        chunks.append(" ".join(chunk_words))
+    return chunks
+
+def chunk_text(text: str, overlap, chunk_size: int = 200) -> list[str]:
+    chunks = fixed_sized_chunking(text, overlap, chunk_size)
+    print(f"Chunking {len(text)} characters")   
+    for i, chunk in enumerate(chunks):
+        print(f"{i + 1}. {chunk}")
+
 def search_command(query: str, limit: int = 5) -> list[dict]:
     ss = SemanticSearch()
     ss.load_or_create_embeddings(load_movies())
