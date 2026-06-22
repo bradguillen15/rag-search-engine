@@ -1,10 +1,13 @@
 import numpy as np
 from sentence_transformers import SentenceTransformer
-from lib.search_utils import CACHE_PATH, load_movies
+
+from lib.search_utils import CACHE_PATH
+from lib.vector_utils import cosine_similarity
+
 
 class SemanticSearch:
-    def __init__(self):
-        self.model = SentenceTransformer("all-MiniLM-L6-v2")
+    def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
+        self.model = SentenceTransformer(model_name)
         self.embeddings = None
         self.documents = None
         self.document_map = {}
@@ -37,15 +40,15 @@ class SemanticSearch:
         if not text or not text.strip():
             raise ValueError("Must have text to create an embedding")
         return self.model.encode([text])[0]
-    
+
     def search(self, query: str, limit: int = 5) -> list[dict]:
         if self.embeddings is None:
             raise ValueError("No embeddings loaded. Call `load_or_create_embeddings` first.")
-        
+
         query_emb = self.generate_embedding(query)
 
         similarities = []
-        for doc_emb, doc in zip( self.embeddings, self.documents):
+        for doc_emb, doc in zip(self.embeddings, self.documents):
             similarity = cosine_similarity(query_emb, doc_emb)
             similarities.append((similarity, doc))
         similarities.sort(key=lambda x: x[0], reverse=True)
@@ -58,68 +61,3 @@ class SemanticSearch:
                 "description": doc["description"],
             })
         return results
-
-def  fixed_sized_chunking(text: str, overlap, chunk_size: int = 200) -> list[str]:
-    words = text.split()
-    chunks = []
-    step_size = chunk_size - overlap
-    for i in range(0, len(words), step_size):
-        chunk_words = words[i:i+chunk_size]
-        if len(chunk_words) <= overlap:
-            break
-        chunks.append(" ".join(chunk_words))
-    return chunks
-
-def chunk_text(text: str, overlap, chunk_size: int = 200) -> list[str]:
-    chunks = fixed_sized_chunking(text, overlap, chunk_size)
-    print(f"Chunking {len(text)} characters")   
-    for i, chunk in enumerate(chunks):
-        print(f"{i + 1}. {chunk}")
-
-def search_command(query: str, limit: int = 5) -> list[dict]:
-    ss = SemanticSearch()
-    ss.load_or_create_embeddings(load_movies())
-    search_results = ss.search(query, limit)
-
-    for index, result in enumerate(search_results):
-        print(f"{index + 1}. {result['title']} (score: {result['score']:.4f})")
-        print(f"{result['description'][:100]}")
-
-def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
-    dot_product = np.dot(vec1, vec2)
-    norm1 = np.linalg.norm(vec1)
-    norm2 = np.linalg.norm(vec2)
-
-    if norm1 == 0 or norm2 == 0:
-        return 0.0
-
-    return dot_product / (norm1 * norm2)
-
-def embed_query_text(query: str):
-    ss = SemanticSearch()
-    embedding = ss.generate_embedding(query)
-    print(f"Query: {query}")
-    print(f"First 3 dimensions: {embedding[:3]}")
-    print(f"Shape: {embedding.shape}")
-
-def verify_embeddings():
-    ss = SemanticSearch()
-    documents = load_movies()
-    embeddings = ss.load_or_create_embeddings(documents)
-    print(f"Number of docs:   {len(documents)}")
-    print(f"Embeddings shape: {embeddings.shape[0]} vectors in {embeddings.shape[1]} dimensions")
-
-def embed_text(text: str):
-    ss = SemanticSearch()
-    embedding = ss.generate_embedding(text)
-
-    print(f"Text: {text}")
-    print(f"First 3 dimensions: {embedding[:3]}")
-    print(f"Dimensions: {embedding.shape[0]}")
-
-
-def verify_model():
-    ss = SemanticSearch()
-
-    print(f"Model loaded: {ss.model}")
-    print(f"Max sequence length: {ss.model.max_seq_length}")
