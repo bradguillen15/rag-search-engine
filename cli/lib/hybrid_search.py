@@ -1,7 +1,7 @@
 import os
 from lib.search_utils import load_movies
 from lib.llm import augmented_prompt
-from lib.rerank import individual_rerank
+from lib.rerank import individual_rerank, batch_rerank
 from lib.inverted_index import InvertedIndex
 from lib.chunked_semantic_search import ChunkedSemanticSearch
 
@@ -66,7 +66,11 @@ def rrf_search(
     results = hs.rrf_search(query, k, rrf_limit)
 
     if rerank_method:
-        rerank_results = individual_rerank(query, results)
+        if rerank_method == "individual":
+            rerank_results = individual_rerank(query, results)
+        elif rerank_method == "batch":
+            rerank_results = batch_rerank(query, results)
+            
         print(f"Re-ranking top {limit} results using {rerank_method} method...")
         print(f"Reciprocal Rank Fusion Results for '{query}' (k={k}):")
         for idx, result in enumerate(rerank_results):
