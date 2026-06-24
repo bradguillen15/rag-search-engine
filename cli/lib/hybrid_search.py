@@ -1,7 +1,9 @@
 import os
+from lib.llm import correct_spelling
 from lib.search_utils import load_movies
 from lib.inverted_index import InvertedIndex
 from lib.chunked_semantic_search import ChunkedSemanticSearch
+from lib.llm import rewrite_query
 
 class HybridSearch:
     def __init__(self, documents: list[dict]) -> None:
@@ -42,9 +44,20 @@ def weighted_search(query: str, alpha: float = 0.5, limit: int = 5) -> list[dict
         print(f"  {result['description'][:100]}...")
     return results
 
-def rrf_search(query: str, k: int = 60, limit: int = 5) -> list[dict]:
-    hs = HybridSearch(load_movies())
+def rrf_search(query: str, k: int = 60, limit: int = 5, enhance: str = None) -> list[dict]:
+    hs = HybridSearch(load_movies())    
+    match enhance:
+        case "spell":
+            new_query = correct_spelling(query)
+            print(f"Enhanced query (spell): '{query}' -> '{new_query}'\n")
+            query = new_query
+        case "rewrite":
+            new_query = rewrite_query(query)
+            print(f"Enhanced query (rewrite): '{query}' -> '{new_query}'\n")
+            query = new_query
+
     results = hs.rrf_search(query, k, limit)
+
     for idx, result in enumerate(results):
         print(f"{idx + 1}. {result['title']}")
         print(f"  RRF Score: {result['rrf_score']:.3f}")
