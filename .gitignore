@@ -11,3 +11,5 @@ cache/
 
 # Virtual environments
 .venv
+
+.env
