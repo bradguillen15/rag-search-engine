@@ -77,21 +77,22 @@ class ChunkedSemanticSearch(SemanticSearch):
                 'chunk_id': cidx,
                 'score': sim,
             })
-            movie_scores[midx] = max(movie_scores.get(midx, 0), sim) 
-            movie_scores_sorted = sorted(
-                movie_scores.items(), 
-                key=lambda x: x[1], reverse=True
-            )
-            results = []
-            for midx, score in movie_scores_sorted[:limit]:
-                doc = self.documents[midx]
-                results.append({
-                    "id": doc['id'],
-                    "title": doc['title'],
-                    "document": doc['description'][:100],
-                    "score": round(score, 4),
-                    "metadata": {}
-                })
+            movie_scores[midx] = max(movie_scores.get(midx, 0), sim)
+
+        movie_scores_sorted = sorted(
+            movie_scores.items(),
+            key=lambda x: x[1], reverse=True
+        )
+        results = []
+        for midx, score in movie_scores_sorted[:limit]:
+            doc = self.documents[midx]
+            results.append({
+                "id": doc['id'],
+                "title": doc['title'],
+                "document": doc['description'][:100],
+                "score": round(score, 4),
+                "metadata": {}
+            })
         return results
 
 
