@@ -1,7 +1,7 @@
 import os
 from lib.search_utils import load_movies
 from lib.llm import augmented_prompt
-from lib.rerank import individual_rerank, batch_rerank
+from lib.rerank import individual_rerank, batch_rerank, cross_encoder_rerank
 from lib.inverted_index import InvertedIndex
 from lib.chunked_semantic_search import ChunkedSemanticSearch
 
@@ -66,7 +66,9 @@ def rrf_search(
     results = hs.rrf_search(query, k, rrf_limit)
 
     if rerank_method:
-        if rerank_method == "individual":
+        if rerank_method == "cross_encoder":
+            rerank_results = cross_encoder_rerank(query, results)
+        elif rerank_method == "individual":
             rerank_results = individual_rerank(query, results)
         elif rerank_method == "batch":
             rerank_results = batch_rerank(query, results)
@@ -75,7 +77,7 @@ def rrf_search(
         print(f"Reciprocal Rank Fusion Results for '{query}' (k={k}):")
         for idx, result in enumerate(rerank_results):
             print(f"{idx + 1}. {result['title']}")
-            print(f"  Re-rank Score: {result['rerank_response']:.3f}")
+            print(f"  Re-rank Score: {result.get('rerank_response', result['cross_encoder_score']):.3f}")
             print(f"  RRF Score: {result['rrf_score']:.3f}")
             print(f"  BM25 Rank: {result['bm25_rank']}, Semantic Rank: {result['sem_rank']}")
             print(f"  {result['description'][:100]}...")

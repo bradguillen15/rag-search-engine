@@ -1,4 +1,5 @@
 import argparse
+from lib.rerank import cross_encoder_rerank
 from lib.hybrid_search import normalize_scores, weighted_search, rrf_search
 
 def main() -> None:
@@ -18,11 +19,13 @@ def main() -> None:
     rrf_search_parser.add_argument("-k", type=int, default=60, help="K parameter for RRF")
     rrf_search_parser.add_argument("--limit", type=int, default=5, help="# of results to return")
     rrf_search_parser.add_argument("--enhance", type=str, choices=["spell", "rewrite", "expand"], help="Query enhancement")
-    rrf_search_parser.add_argument("--rerank-method", type=str, choices=["individual", "batch"], help="Rerank method")
+    rrf_search_parser.add_argument("--rerank-method", type=str, choices=["individual", "batch", "cross_encoder"], help="Rerank method")
 
     args = parser.parse_args()
 
     match args.command:
+        case "cross_encoder":
+            cross_encoder_rerank(args.query, args.k, args.limit, args.enhance, args.rerank_method)
         case "rrf-search":
             rrf_search(args.query, args.k, args.limit, args.enhance, args.rerank_method)
         case "weighted-search":
