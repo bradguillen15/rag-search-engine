@@ -1,7 +1,7 @@
 import os
 from google import genai
 from dotenv import load_dotenv
-from lib.prompts import get_spelling_prompt, get_rewriting_prompt
+from lib.prompts import load_prompt
 
 MODEL = "gemini-2.5-flash"
 
@@ -16,8 +16,5 @@ def generate_content(prompt: str):
     response = client.models.generate_content(model=MODEL, contents=prompt)
     return response.text
 
-def correct_spelling(query: str):
-    return generate_content(get_spelling_prompt(query))
-
-def rewrite_query(query: str):
-    return generate_content(get_rewriting_prompt(query))
+def augmented_prompt(query: str, enhance: str):
+    return generate_content(load_prompt(enhance, query=query))

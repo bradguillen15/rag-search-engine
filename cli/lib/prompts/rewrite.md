@@ -1,5 +1,4 @@
-def get_rewriting_prompt(query: str) -> str:
-    return f"""Rewrite the user-provided movie search query below to be more specific and searchable.
+Rewrite the user-provided movie search query below to be more specific and searchable.
 
 Consider:
 - Common movie knowledge (famous actors, popular films)
@@ -17,13 +16,3 @@ If you cannot improve the query, output the original unchanged.
 Output only the rewritten query text, nothing else.
 
 User query: "{query}"
-"""
-
-def get_spelling_prompt(query: str) -> str:
-    return f"""Fix any spelling errors in the user-provided movie search query below.
-Correct only clear, high-confidence typos. Do not rewrite, add, remove, or reorder words.
-Preserve punctuation and capitalization unless a change is required for a typo fix.
-If there are no spelling errors, or if you're unsure, output the original query unchanged.
-Output only the final query text, nothing else.
-User query: "{query}"
-"""
