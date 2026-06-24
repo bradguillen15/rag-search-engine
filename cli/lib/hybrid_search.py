@@ -1,6 +1,7 @@
 import os
 from lib.search_utils import load_movies
 from lib.llm import augmented_prompt
+from lib.rerank import individual_rerank
 from lib.inverted_index import InvertedIndex
 from lib.chunked_semantic_search import ChunkedSemanticSearch
 
@@ -43,7 +44,13 @@ def weighted_search(query: str, alpha: float = 0.5, limit: int = 5) -> list[dict
         print(f"  {result['description'][:100]}...")
     return results
 
-def rrf_search(query: str, k: int = 60, limit: int = 5, enhance: str = None) -> list[dict]:
+def rrf_search(
+    query: str, 
+    k: int = 60,
+    limit: int = 5,
+    enhance: str = None,
+    rerank_method: str = None
+) -> list[dict]:
     hs = HybridSearch(load_movies())  
 
     if enhance:
@@ -55,7 +62,20 @@ def rrf_search(query: str, k: int = 60, limit: int = 5, enhance: str = None) -> 
         print(f"Enhanced query ({enhance}): '{query}' -> '{new_query}'\n")
         query = new_query
 
-    results = hs.rrf_search(query, k, limit)
+    rrf_limit = limit * 5 if rerank_method == "individual" else limit
+    results = hs.rrf_search(query, k, rrf_limit)
+
+    if rerank_method:
+        rerank_results = individual_rerank(query, results)
+        print(f"Re-ranking top {limit} results using {rerank_method} method...")
+        print(f"Reciprocal Rank Fusion Results for '{query}' (k={k}):")
+        for idx, result in enumerate(rerank_results):
+            print(f"{idx + 1}. {result['title']}")
+            print(f"  Re-rank Score: {result['rerank_response']:.3f}")
+            print(f"  RRF Score: {result['rrf_score']:.3f}")
+            print(f"  BM25 Rank: {result['bm25_rank']}, Semantic Rank: {result['sem_rank']}")
+            print(f"  {result['description'][:100]}...")
+        return rerank_results
 
     for idx, result in enumerate(results):
         print(f"{idx + 1}. {result['title']}")
