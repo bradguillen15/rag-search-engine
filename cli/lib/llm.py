@@ -23,3 +23,11 @@ def augmented_prompt(query: str, enhance: str):
 def llm_judge(query: str, formatted_results: str):
     prompt = load_prompt("llm_judge", query=query, formatted_results=formatted_results)
     return json.loads(generate_content(prompt) or "[]")
+
+def answer_question(query: str, docs: list[dict]) -> str:
+    formatted_docs = "\n\n".join(
+        f"Title: {doc['title']}\n{doc['description']}" for doc in docs
+    )
+    prompt = load_prompt("answer_question", query=query, docs=formatted_docs)
+    return generate_content(prompt)
+    
