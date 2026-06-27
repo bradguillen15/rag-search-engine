@@ -31,3 +31,9 @@ def answer_question(query: str, docs: list[dict]) -> str:
     prompt = load_prompt("answer_question", query=query, docs=formatted_docs)
     return generate_content(prompt)
     
+def summarize_results(query: str, docs: list[dict]) -> str:
+    formatted_docs = "\n\n".join(
+        f"Title: {doc['title']}\n{doc['description']}" for doc in docs
+    )
+    prompt = load_prompt("summarization", query=query, results=formatted_docs)
+    return generate_content(prompt)

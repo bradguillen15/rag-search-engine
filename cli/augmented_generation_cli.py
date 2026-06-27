@@ -1,5 +1,5 @@
 import argparse
-from lib.rag import rag
+from lib.rag import query_answering, doc_summarization
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Retrieval Augmented Generation CLI")
@@ -7,11 +7,18 @@ def main() -> None:
 
     rag_parser = subparsers.add_parser("rag", help="Perform RAG (search + generate answer)")
     rag_parser.add_argument("query", type=str, help="Search query for RAG")
+
+    summarization_parser = subparsers.add_parser("summarize", help="Perform document summarization")
+    summarization_parser.add_argument("query", type=str, help="Search query for summarization")
+    summarization_parser.add_argument("--limit", type=int, default=5, help="Number of results to return")
+
     args = parser.parse_args()
 
     match args.command:
         case "rag":
-            rag(args.query)
+            query_answering(args.query)
+        case "summarize":
+            doc_summarization(args.query, args.limit)
         case _:
             parser.print_help()
 
