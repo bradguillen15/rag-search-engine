@@ -23,8 +23,12 @@ def evaluate(limit):
         for rrf_result in rrf_results:
             relevant_count += rrf_result["title"] in expected_results
         precision = relevant_count / limit
+        recall = relevant_count / len(expected_results)
+        f1_score = 2 * (precision * recall) / (precision + recall)
 
         print(f"- Query: {query}")
         print(f"  - Precision@{limit}: {precision:.4f}")
+        print(f"  - Recall@{limit}: {recall:.4f}")
+        print(f"  - F1 Score: {f1_score:.4f}")
         print(f"  - Retrieved: {', '.join([result['title'] for result in rrf_results])}")
         print(f"  - Relevant: {', '.join(expected_results)}")

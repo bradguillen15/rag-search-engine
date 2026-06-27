@@ -20,14 +20,15 @@ def main() -> None:
     rrf_search_parser.add_argument("--limit", type=int, default=5, help="# of results to return")
     rrf_search_parser.add_argument("--enhance", type=str, choices=["spell", "rewrite", "expand"], help="Query enhancement")
     rrf_search_parser.add_argument("--rerank-method", type=str, choices=["individual", "batch", "cross_encoder"], help="Rerank method")
+    rrf_search_parser.add_argument("--evaluate", action="store_true", help="Run LLM as a judge in the results")
 
     args = parser.parse_args()
 
     match args.command:
         case "cross_encoder":
-            cross_encoder_rerank(args.query, args.k, args.limit, args.enhance, args.rerank_method)
+            cross_encoder_rerank(args.query, args.k, args.limit, args.enhance, args.rerank_method, args.evaluate)
         case "rrf-search":
-            rrf_search(args.query, args.k, args.limit, args.enhance, args.rerank_method)
+            rrf_search(args.query, args.k, args.limit, args.enhance, args.rerank_method, args.evaluate)
         case "weighted-search":
             weighted_search(args.query, args.alpha, args.limit)
         case "normalize":

@@ -1,6 +1,6 @@
 import os
 from lib.search_utils import load_movies
-from lib.llm import augmented_prompt
+from lib.llm import augmented_prompt, llm_judge
 from lib.rerank import individual_rerank, batch_rerank, cross_encoder_rerank
 from lib.inverted_index import InvertedIndex
 from lib.chunked_semantic_search import ChunkedSemanticSearch
@@ -49,7 +49,8 @@ def rrf_search(
     k: int = 60,
     limit: int = 5,
     enhance: str = None,
-    rerank_method: str = None
+    rerank_method: str = None,
+    evaluate: bool = False,
 ) -> list[dict]:
     hs = HybridSearch(load_movies())  
 
@@ -75,19 +76,31 @@ def rrf_search(
             
         print(f"Re-ranking top {limit} results using {rerank_method} method...")
         print(f"Reciprocal Rank Fusion Results for '{query}' (k={k}):")
+        if evaluate:
+            formatted_results = []
         for idx, result in enumerate(rerank_results):
             print(f"{idx + 1}. {result['title']}")
             print(f"  Re-rank Score: {result.get('rerank_response', result['cross_encoder_score']):.3f}")
             print(f"  RRF Score: {result['rrf_score']:.3f}")
             print(f"  BM25 Rank: {result['bm25_rank']}, Semantic Rank: {result['sem_rank']}")
             print(f"  {result['description'][:100]}...")
+            if evaluate:
+                formatted_results.append(f"<result id={idx}>{result['title']}</result> - {result['description'][:100]}...</result>")
         return rerank_results
 
+    formatted_results = []
     for idx, result in enumerate(results):
         print(f"{idx + 1}. {result['title']}")
         print(f"  RRF Score: {result['rrf_score']:.3f}")
         print(f"  BM25 Rank: {result['bm25_rank']}, Semantic Rank: {result['sem_rank']}")
         print(f"  {result['description'][:100]}...")
+        if evaluate:
+            formatted_results.append(f"<result id={idx}>{result['title']}</result> - {result['description'][:100]}...</result>")
+
+    if evaluate: 
+        llm_judge_results = llm_judge(query, "\n".join(formatted_results))
+        for idx, r in enumerate(results[:limit], start=1):
+            print(f"{idx}. {r['title']}: {llm_judge_results[idx - 1]}/3")
     return results
 
 
