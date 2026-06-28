@@ -24,16 +24,23 @@ def llm_judge(query: str, formatted_results: str):
     prompt = load_prompt("llm_judge", query=query, formatted_results=formatted_results)
     return json.loads(generate_content(prompt) or "[]")
 
+def format_documents(docs: list[dict]) -> str:
+    return "\n\n".join(
+        f"Title: {doc['title']}\n{doc['description']}" for doc in docs
+    )
+
 def answer_question(query: str, docs: list[dict]) -> str:
-    formatted_docs = "\n\n".join(
-        f"Title: {doc['title']}\n{doc['description']}" for doc in docs
-    )
-    prompt = load_prompt("answer_question", query=query, docs=formatted_docs)
+    prompt = load_prompt("answer_question", query=query, docs=format_documents(docs))
     return generate_content(prompt)
-    
+
 def summarize_results(query: str, docs: list[dict]) -> str:
-    formatted_docs = "\n\n".join(
-        f"Title: {doc['title']}\n{doc['description']}" for doc in docs
-    )
-    prompt = load_prompt("summarization", query=query, results=formatted_docs)
+    prompt = load_prompt("summarization", query=query, results=format_documents(docs))
+    return generate_content(prompt)
+
+def citations(query: str, docs: list[dict]) -> str:
+    prompt = load_prompt("citations", query=query, documents=format_documents(docs))
+    return generate_content(prompt)
+
+def answer_detailed_question(query: str, docs: list[dict]) -> str:
+    prompt = load_prompt("answer_detailed_question", query=query, context=format_documents(docs))
     return generate_content(prompt)
