@@ -20,7 +20,7 @@ Python · NLTK · NumPy · sentence-transformers · Google Gemini API · uv
 
 ```bash
 uv sync
-cp .env.example .env   # add GEMINI_API_KEY
+# create .env with GEMINI_API_KEY
 ```
 
 Run CLIs from the `cli/` directory (e.g. `python keyword_search_cli.py`, `python augmented_generation_cli.py rag "your query"`).
